@@ -98,6 +98,18 @@ const routes = [
         component: () => import('../modules/public/pages/HelpCenterPage.vue'),
     },
 
+    // Unified Dashboard Route
+    {
+        path: '/dashboard',
+        name: 'dashboard',
+        redirect: (to) => {
+            const authStore = useAuthStore();
+            if (authStore.isAdmin) return '/admin';
+            if (authStore.isInstructor) return '/instructor';
+            return '/student';
+        },
+    },
+
     // Student routes
     {
         path: '/student',
@@ -482,9 +494,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.meta.guest && authStore.isAuthenticated) {
-        if (authStore.isAdmin) return next({ name: 'admin-dashboard' });
-        if (authStore.isInstructor) return next({ name: 'instructor-dashboard' });
-        return next({ name: 'student-dashboard' });
+        return next({ name: 'dashboard' });
     }
 
     if (to.meta.role === 'admin' && !authStore.isAdmin) {
@@ -492,7 +502,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.meta.role === 'instructor' && !authStore.isInstructor) {
-        return next({ name: 'student-dashboard' });
+        return next({ name: 'dashboard' });
     }
 
     next();

@@ -316,7 +316,8 @@ async function handleSubmit() {
             password_confirmation: form.password_confirmation,
             role: form.role
         });
-        router.push(`/${form.role}/dashboard`);
+        
+        router.push('/dashboard');
     } catch (err) {
         const data = err.response?.data;
         if (data?.errors) {

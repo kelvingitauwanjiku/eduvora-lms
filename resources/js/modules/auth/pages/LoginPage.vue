@@ -207,8 +207,13 @@ const handleLogin = async () => {
   
   try {
     await authStore.login({ email: form.email, password: form.password, remember: form.remember });
-    const redirect = route.query.redirect || '/';
-    router.push(redirect);
+    
+    const redirect = route.query.redirect;
+    if (redirect) {
+      router.push(redirect);
+    } else {
+      router.push('/dashboard');
+    }
   } catch (err) {
     const data = err.response?.data;
     if (data?.errors) {

@@ -113,7 +113,7 @@ Route::prefix('v1')->group(function () {
     Route::get('sw.js', [PwaController::class, 'serviceWorker']);
 
     // ========== PROTECTED ==========
-    Route::middleware('auth:web')->group(function () {
+    Route::middleware('auth:api')->group(function () {
 
         // Auth
         Route::get('auth/me', [AuthController::class, 'me']);

@@ -8,8 +8,17 @@ export const useAuthStore = defineStore('auth', () => {
     const loading = ref(false);
 
     const isAuthenticated = computed(() => !!token.value);
-    const isAdmin = computed(() => user.value?.role === 'admin');
-    const isInstructor = computed(() => user.value?.role === 'instructor' || user.value?.is_instructor);
+    const isAdmin = computed(() => {
+        if (user.value?.role === 'admin') return true;
+        if (user.value?.roles?.some(r => r.slug === 'admin')) return true;
+        return false;
+    });
+    const isInstructor = computed(() => {
+        if (user.value?.role === 'instructor') return true;
+        if (user.value?.is_instructor) return true;
+        if (user.value?.roles?.some(r => r.slug === 'instructor')) return true;
+        return false;
+    });
     const isStudent = computed(() => !isAdmin.value && !isInstructor.value);
 
     async function checkAuth() {
@@ -17,7 +26,9 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const { data } = await authApi.me();
             user.value = data;
-            localStorage.setItem('user', JSON.stringify(data));
+            if (data.roles) {
+                localStorage.setItem('user', JSON.stringify(data));
+            }
         } catch (error) {
             logout();
         }

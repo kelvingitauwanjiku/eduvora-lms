@@ -112,7 +112,7 @@ class CouponController extends Controller
         ]);
     }
 
-    public function validate(Request $request)
+    public function validateCoupon(Request $request)
     {
         $validated = $request->validate([
             'code' => 'required|string',
