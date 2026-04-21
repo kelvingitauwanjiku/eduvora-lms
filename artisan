@@ -1,0 +1,25 @@
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
+function loadClass($class) {
+    $prefixes = [
+        'Laravel\Sanctum\HasApiTokens' => __DIR__.'/vendor/laravel/sanctum/src/HasApiTokens.php',
+        'Laravel\Sanctum\SanctumServiceProvider' => __DIR__.'/vendor/laravel/sanctum/src/SanctumServiceProvider.php',
+    ];
+    
+    if (isset($prefixes[$class])) {
+        require_once $prefixes[$class];
+    }
+}
+
+spl_autoload_register('loadClass');
+
+$app = require_once __DIR__.'/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
+$kernel->terminate($input, $status);
+exit($status);
