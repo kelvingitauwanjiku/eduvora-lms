@@ -1,0 +1,12 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/ypforum/public_html
+    - /bin/cp -r * $DEPLOYPATH/
+    - /bin/cp -r .??* $DEPLOYPATH/ 2>/dev/null || true
+    - cd $DEPLOYPATH
+    - /bin/php artisan migrate --force
+    - /bin/php artisan optimize:clear
+    - /bin/php artisan optimize
+    - /bin/php artisan config:cache
+    - /bin/php artisan route:cache
