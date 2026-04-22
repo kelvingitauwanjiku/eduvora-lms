@@ -119,7 +119,7 @@ const socials = [
 ];
 
 function handleSubscribe() {
-    console.log('Subscribe:', email.value);
+    if (!import.meta?.env?.PROD) console.log('Subscribe:', email.value);
     email.value = '';
 }
 </script>

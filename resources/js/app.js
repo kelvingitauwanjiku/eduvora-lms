@@ -12,8 +12,10 @@ app.use(createPinia());
 app.use(router);
 
 app.config.errorHandler = (err, instance, info) => {
-    console.error('Vue Error:', err);
-    console.error('Info:', info);
+    if (!import.meta?.env?.PROD) {
+        console.error('Vue Error:', err);
+        console.error('Info:', info);
+    }
 };
 
 app.mount('#app');

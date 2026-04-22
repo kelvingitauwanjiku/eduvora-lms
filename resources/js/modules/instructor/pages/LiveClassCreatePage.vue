@@ -48,5 +48,5 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 const form = reactive({ title: '', course_id: '', date: '', time: '', duration: 60, description: '' });
-function schedule() { console.log('schedule', form); router.push('/instructor/live-classes'); }
+function schedule() { if (!import.meta?.env?.PROD) console.log('schedule', form); router.push('/instructor/live-classes'); }
 </script>

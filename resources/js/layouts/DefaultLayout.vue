@@ -16,7 +16,7 @@ import AppFooter from '../components/layout/AppFooter.vue';
 import { topBarConfig } from '../config/topbar';
 
 function handleLanguageChange(lang) {
-    console.log('Language changed to:', lang);
+    if (!import.meta?.env?.PROD) console.log('Language changed to:', lang);
     // Future: integrate with i18n, API call to save preference, reload content
 }
 </script>

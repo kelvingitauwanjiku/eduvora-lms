@@ -10,9 +10,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    console.log('🌐 API Request:', config.method?.toUpperCase(), config.url);
-    console.log('📦 Data:', config.data);
-    console.log('📋 Headers:', config.headers);
+    if (!import.meta?.env?.PROD) {
+        console.log('🌐 API Request:', config.method?.toUpperCase(), config.url);
+        console.log('📦 Data:', config.data);
+        console.log('📋 Headers:', config.headers);
+    }
     const token = localStorage.getItem('token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -22,11 +24,15 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
     (response) => {
-        console.log('✅ API Response:', response.status, response.config.url);
+        if (!import.meta?.env?.PROD) {
+            console.log('✅ API Response:', response.status, response.config.url);
+        }
         return response;
     },
     (error) => {
-        console.log('❌ API Error:', error.response?.status, error.config?.url, error.response?.data);
+        if (!import.meta?.env?.PROD) {
+            console.log('❌ API Error:', error.response?.status, error.config?.url, error.response?.data);
+        }
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

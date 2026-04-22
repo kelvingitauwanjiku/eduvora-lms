@@ -9,8 +9,8 @@ if (token) {
 }
 
 window.toast = {
-    success: (message) => console.log('Success:', message),
-    error: (message) => console.error('Error:', message),
-    warning: (message) => console.warn('Warning:', message),
-    info: (message) => console.info('Info:', message),
+    success: (message) => { if (!import.meta?.env?.PROD) console.log('Success:', message); },
+    error: (message) => { if (!import.meta?.env?.PROD) console.error('Error:', message); },
+    warning: (message) => { if (!import.meta?.env?.PROD) console.warn('Warning:', message); },
+    info: (message) => { if (!import.meta?.env?.PROD) console.info('Info:', message); },
 };

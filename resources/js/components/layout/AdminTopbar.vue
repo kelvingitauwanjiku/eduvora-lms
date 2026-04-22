@@ -219,7 +219,7 @@ const unreadMessages = ref(3);
 
 function selectSchool(school) {
     // Implementation for school switching
-    console.log('Switched to school:', school.id);
+    if (!import.meta?.env?.PROD) console.log('Switched to school:', school.id);
     schoolOpen.value = false;
 }
 

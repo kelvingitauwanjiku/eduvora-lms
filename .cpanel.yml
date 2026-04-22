@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/ypforum/public_html
+    - export DEPLOYPATH=/home/ypforum/deveint.ypforum.org
     - rm -rf $DEPLOYPATH/storage/logs/*.log 2>/dev/null || true
     - /bin/cp -r app $DEPLOYPATH/
     - /bin/cp -r bootstrap $DEPLOYPATH/
