@@ -244,8 +244,8 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { analyticsApi, courseApi } from '@/services/api';
-import LineChart from '@/components/charts/LineChart.vue';
+import { instructorApi, courseApi } from '@/services/api';
+import LineChart from '@/components/ui/LineChart.vue';
 
 const authStore = useAuthStore();
 
@@ -294,8 +294,17 @@ function formatDate(date) {
 
 async function fetchDashboard() {
     try {
-        const { data } = await analyticsApi.getDashboard();
-        stats.value = { ...stats.value, ...data.stats };
+        const { data } = await instructorApi.getDashboard();
+        stats.value = {
+            total_earnings: data.total_earnings || 0,
+            total_students: data.total_students || 0,
+            total_courses: data.total_courses || 0,
+            avg_rating: data.avg_rating || '0.0',
+            earnings_change: data.earnings_change || 0,
+            students_change: data.students_change || 0,
+            published_courses: data.published_courses || 0,
+            total_reviews: data.total_reviews || 0,
+        };
         
         if (data.recent_enrollments) {
             recentEnrollments.value = data.recent_enrollments;
@@ -313,7 +322,7 @@ async function fetchDashboard() {
 
 async function fetchRevenueChart() {
     try {
-        const { data } = await analyticsApi.getRevenue({ days: chartPeriod.value });
+        const { data } = await instructorApi.getRevenue({ days: chartPeriod.value });
         revenueChartData.labels = data.labels || [];
         revenueChartData.datasets[0].data = data.values || [];
     } catch (error) {
@@ -323,7 +332,7 @@ async function fetchRevenueChart() {
 
 async function fetchCourses() {
     try {
-        const { data } = await courseApi.getAll({ per_page: 6 });
+        const { data } = await instructorApi.getCourses({ per_page: 6 });
         courses.value = data.data || [];
     } catch (error) {
         console.error('Error fetching courses:', error);

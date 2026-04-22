@@ -54,7 +54,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { bundleApi } from '../../../services/api';
+import { bundleApi } from '@/services/api';
 
 const loading = ref(true);
 const bundles = ref([]);

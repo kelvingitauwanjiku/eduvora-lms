@@ -196,7 +196,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { categoryApi } from '../../../services/api';
+import { categoryApi } from '@/services/api';
 
 const search = ref('');
 const filterStatus = ref('');

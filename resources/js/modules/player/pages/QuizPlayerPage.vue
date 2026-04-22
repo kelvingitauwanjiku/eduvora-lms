@@ -146,7 +146,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { quizApi } from '../../../services/api';
+import { quizApi } from '@/services/api';
 
 const route = useRoute();
 const router = useRouter();

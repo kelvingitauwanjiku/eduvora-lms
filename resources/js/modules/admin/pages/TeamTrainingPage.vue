@@ -36,6 +36,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { teamTrainingApi } from '@/services/api';
+
+const loading = ref(true);
 const items = ref([]);
+
+async function fetchItems() {
+    try {
+        loading.value = true;
+        const { data } = await teamTrainingApi.getAll();
+        items.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching team training:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(() => {
+    fetchItems();
+});
 </script>

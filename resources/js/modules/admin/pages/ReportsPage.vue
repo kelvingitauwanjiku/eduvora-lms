@@ -34,7 +34,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { analyticsApi } from '@/services/api';
 
 const stats = ref({
     revenue: 0,
@@ -42,4 +43,19 @@ const stats = ref({
     new_users: 0,
     new_courses: 0,
 });
+const loading = ref(false);
+
+async function fetchAnalytics() {
+    loading.value = true;
+    try {
+        const { data } = await analyticsApi.getDashboard();
+        stats.value = data;
+    } catch (err) {
+        console.error('Failed to load analytics:', err);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(() => { fetchAnalytics(); });
 </script>

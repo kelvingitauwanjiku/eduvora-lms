@@ -67,8 +67,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { payoutApi } from '@/services/api';
 
+const loading = ref(true);
 const pendingPayouts = ref([]);
 const payoutHistory = ref([]);
 
@@ -77,11 +79,41 @@ function formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+async function fetchPayouts() {
+    try {
+        loading.value = true;
+        const { data } = await payoutApi.getAllAdmin();
+        const allPayouts = data.data || [];
+        pendingPayouts.value = allPayouts.filter(p => p.status === 'pending');
+        payoutHistory.value = allPayouts.filter(p => p.status !== 'pending');
+    } catch (error) {
+        console.error('Error fetching payouts:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
 async function approvePayout(id) {
-    console.log('Approve payout:', id);
+    try {
+        await payoutApi.approve(id);
+        await fetchPayouts();
+    } catch (error) {
+        console.error('Error approving payout:', error);
+        alert('Failed to approve payout');
+    }
 }
 
 async function rejectPayout(id) {
-    console.log('Reject payout:', id);
+    try {
+        await payoutApi.reject(id);
+        await fetchPayouts();
+    } catch (error) {
+        console.error('Error rejecting payout:', error);
+        alert('Failed to reject payout');
+    }
 }
+
+onMounted(() => {
+    fetchPayouts();
+});
 </script>

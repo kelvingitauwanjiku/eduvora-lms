@@ -31,6 +31,24 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { bootcampApi } from '@/services/api';
+
+const loading = ref(true);
 const bootcamps = ref([]);
-onMounted(() => {});
+
+async function fetchBootcamps() {
+    try {
+        loading.value = true;
+        const { data } = await bootcampApi.getAllAdmin();
+        bootcamps.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching bootcamps:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(() => {
+    fetchBootcamps();
+});
 </script>

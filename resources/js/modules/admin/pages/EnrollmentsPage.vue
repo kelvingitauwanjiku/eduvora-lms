@@ -40,14 +40,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { enrollmentApi } from '@/services/api';
 
 const enrollments = ref([]);
+const loading = ref(false);
 
 function formatDate(date) {
     if (!date) return '';
     return new Date(date).toLocaleDateString();
 }
 
-onMounted(() => {});
+async function fetchEnrollments() {
+    loading.value = true;
+    try {
+        const { data } = await enrollmentApi.getAll();
+        enrollments.value = data.data || data;
+    } catch (err) {
+        console.error('Failed to load enrollments:', err);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(() => { fetchEnrollments(); });
 </script>

@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { userApi } from '../../../services/api';
+import { userApi } from '@/services/api';
 
 const search = ref('');
 const role = ref('');

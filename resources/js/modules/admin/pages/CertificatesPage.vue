@@ -70,10 +70,36 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { certificateApi } from '@/services/api';
 
+const loading = ref(true);
 const showBuilder = ref(false);
 const certificates = ref([]);
 const builder = reactive({ name: '', backgroundColor: '#ffffff', borderColor: '#3b82f6', content: '' });
 
-onMounted(() => {});
+async function fetchCertificates() {
+    try {
+        loading.value = true;
+        const { data } = await certificateApi.getAll();
+        certificates.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching certificates:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+async function saveCertificate() {
+    try {
+        await certificateApi.generate(builder);
+        showBuilder.value = false;
+        await fetchCertificates();
+    } catch (error) {
+        console.error('Error saving certificate:', error);
+    }
+}
+
+onMounted(() => {
+    fetchCertificates();
+});
 </script>

@@ -82,7 +82,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { bootcampApi } from '../../../services/api';
+import { bootcampApi } from '@/services/api';
 
 const loading = ref(true);
 const bootcamps = ref([]);

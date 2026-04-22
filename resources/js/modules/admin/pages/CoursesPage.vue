@@ -66,7 +66,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { courseAdminApi } from '../../../services/api';
+import { courseAdminApi } from '@/services/api';
 
 const search = ref('');
 const courses = ref([]);

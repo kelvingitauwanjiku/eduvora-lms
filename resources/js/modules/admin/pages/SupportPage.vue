@@ -73,15 +73,31 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { supportApi } from '@/services/api';
 
 const search = ref('');
 const tickets = ref([]);
 const stats = reactive({ open: 0, pending: 0, in_progress: 0, resolved: 0 });
+const loading = ref(false);
+
+async function fetchTickets() {
+    loading.value = true;
+    try {
+        const { data } = await supportApi.getTickets({ search: search.value });
+        tickets.value = data.data || data;
+        stats.open = tickets.value.filter(t => t.status === 'open').length;
+        stats.resolved = tickets.value.filter(t => t.status === 'resolved').length;
+    } catch (err) {
+        console.error('Failed to load tickets:', err);
+    } finally {
+        loading.value = false;
+    }
+}
 
 function formatDate(date) {
     if (!date) return '';
     return new Date(date).toLocaleDateString();
 }
 
-onMounted(() => {});
+onMounted(() => { fetchTickets(); });
 </script>

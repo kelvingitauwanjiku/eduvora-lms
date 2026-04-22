@@ -180,7 +180,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { enrollmentApi, courseApi, wishlistApi } from '@/services/api';
+import { enrollmentApi, courseApi, wishlistApi, certificateApi } from '@/services/api';
 
 const authStore = useAuthStore();
 
@@ -188,35 +188,68 @@ const loading = ref(true);
 const stats = ref({ my_courses: 0, certificates: 0, wishlist: 0, hours: 0 });
 const enrolledCourses = ref([]);
 const recommendedCourses = ref([]);
-
 const recentActivity = ref([]);
 
 const quickLinks = [
     { name: 'My Courses', path: '/student/courses', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
     { name: 'Cart', path: '/student/cart', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.427 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z' },
     { name: 'Wishlist', path: '/student/wishlist', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
+    { name: 'Certificates', path: '/student/certificates', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.241-.247 3.47 3.47 0 014.438 0 3.42 3.42 0 001.241.247 3.42 3.42 0 012.814.013 3.47 3.47 0 012.814.013 3.42 3.42 0 001.241.247c.85.215 1.525.85 1.741 1.764' },
     { name: 'Support', path: '/student/support', icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z' },
 ];
 
 async function fetchDashboard() {
     try {
         loading.value = true;
-        const [enrollmentsRes, coursesRes] = await Promise.all([
+        
+        const [enrollmentsRes, coursesRes, wishlistRes, certificatesRes] = await Promise.all([
             enrollmentApi.getAll(),
-            courseApi.getFeatured()
+            courseApi.getFeatured(),
+            wishlistApi.get(),
+            certificateApi.getAll()
         ]);
+        
         enrolledCourses.value = enrollmentsRes.data.data || [];
         recommendedCourses.value = coursesRes.data.data || [];
-        stats.value.my_courses = enrolledCourses.value.length;
-        stats.value.wishlist = 0;
-        stats.value.certificates = 0;
-        stats.value.hours = enrolledCourses.value.reduce((acc, c) => acc + (c.duration || 0), 0);
         
+        const wishlistItems = wishlistRes.data.data || [];
+        const certificates = certificatesRes.data.data || [];
+        
+        stats.value.my_courses = enrolledCourses.value.length;
+        stats.value.wishlist = wishlistItems.length;
+        stats.value.certificates = certificates.length;
+        
+        const totalMinutes = enrolledCourses.value.reduce((acc, c) => {
+            const progress = c.progress || 0;
+            const totalDuration = c.duration || 0;
+            return acc + Math.floor((progress / 100) * totalDuration);
+        }, 0);
+        stats.value.hours = Math.round(totalMinutes / 60);
+        
+        recentActivity.value = [
+            ...enrolledCourses.value.slice(0, 3).map(e => ({
+                id: e.id,
+                title: `Enrolled in ${e.course?.title || 'Course'}`,
+                time: new Date(e.created_at).toLocaleDateString(),
+                icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+                bg: 'bg-blue-100',
+                color: 'text-blue-600'
+            })),
+            ...certificates.slice(0, 2).map(c => ({
+                id: c.id,
+                title: `Certificate earned: ${c.course?.title || 'Course'}`,
+                time: new Date(c.created_at).toLocaleDateString(),
+                icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.241-.247 3.47 3.47 0 014.438 0 3.42 3.42 0 001.241.247 3.42 3.42 0 012.814.013 3.47 3.47 0 012.814.013 3.42 3.42 0 001.241.247c.85.215 1.525.85 1.741 1.764',
+                bg: 'bg-green-100',
+                color: 'text-green-600'
+            }))
+        ];
+        
+    } catch (error) {
+        console.error('Error fetching dashboard:', error);
         recentActivity.value = [
             { id: 1, title: 'Welcome to Eduvora!', time: 'Just now', icon: 'M5 13l4 4L19 7', bg: 'bg-green-100', color: 'text-green-600' },
         ];
-    } catch (error) {
-        console.error('Error fetching dashboard:', error);
     } finally {
         loading.value = false;
     }

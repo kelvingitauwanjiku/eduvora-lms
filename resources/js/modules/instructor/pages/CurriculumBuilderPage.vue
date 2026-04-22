@@ -173,7 +173,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { instructorApi } from '../../../services/api';
+import { instructorApi } from '@/services/api';
 
 const route = useRoute();
 const loading = ref(true);

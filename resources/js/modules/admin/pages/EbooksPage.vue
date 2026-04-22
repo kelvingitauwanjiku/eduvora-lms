@@ -29,6 +29,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { ebookApi } from '@/services/api';
+
+const loading = ref(true);
 const ebooks = ref([]);
+
+async function fetchEbooks() {
+    try {
+        loading.value = true;
+        const { data } = await ebookApi.getAll();
+        ebooks.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching ebooks:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(() => {
+    fetchEbooks();
+});
 </script>

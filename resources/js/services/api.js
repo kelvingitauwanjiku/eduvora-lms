@@ -75,7 +75,6 @@ export const instructorApi = {
     getAll: (params) => api.get('/instructors', { params }),
     getById: (id) => api.get(`/instructors/${id}`),
     getCourses: (id, params) => api.get(`/instructors/${id}/courses`, { params }),
-    getDashboard: (params) => api.get('/instructor/dashboard', { params }),
     updateProfile: (data) => api.put('/instructor/profile', data),
     getSocialLinks: () => api.get('/instructor/social-links'),
     updateSocialLinks: (data) => api.put('/instructor/social-links', data),
@@ -83,12 +82,18 @@ export const instructorApi = {
     enrollStudent: (courseId, data) => api.post(`/instructor/courses/${courseId}/enroll`, data),
     getCurriculum: (courseId) => api.get(`/instructor/courses/${courseId}/curriculum`),
     updateCurriculum: (courseId, data) => api.put(`/instructor/courses/${courseId}/curriculum`, data),
+    getDashboard: () => api.get('/instructor/dashboard'),
+    getMyCourses: (params) => api.get('/instructor/courses', { params }),
+    getRevenue: (params) => api.get('/analytics/revenue', { params }),
 };
 
 export const enrollmentApi = {
-    getAll: () => api.get('/my-enrollments'),
+    getAll: (params) => api.get('/my-enrollments', { params }),
     getById: (id) => api.get(`/my-enrollments/${id}`),
     getProgress: (id) => api.get(`/my-enrollments/${id}/progress`),
+    getAllAdmin: (params) => api.get('/admin/enrollments', { params }),
+    getByIdAdmin: (id) => api.get(`/admin/enrollments/${id}`),
+    getMyEnrollments: () => api.get('/my-enrollments'),
 };
 
 export const cartApi = {
@@ -132,6 +137,10 @@ export const blogApi = {
     delete: (id) => api.delete(`/blogs/${id}`),
     like: (id) => api.post(`/blogs/${id}/like`),
     comment: (id, data) => api.post(`/blogs/${id}/comment`, data),
+    getAllAdmin: (params) => api.get('/admin/blogs', { params }),
+    createAdmin: (data) => api.post('/admin/blogs', data),
+    updateAdmin: (id, data) => api.put(`/admin/blogs/${id}`, data),
+    deleteAdmin: (id) => api.delete(`/admin/blogs/${id}`),
 };
 
 export const searchApi = {
@@ -151,6 +160,10 @@ export const bootcampApi = {
     getCourses: (id) => api.get(`/bootcamps/${id}/courses`),
     enroll: (id) => api.post(`/bootcamps/${id}/enroll`),
     getMyEnrollments: () => api.get('/my-bootcamps'),
+    getAllAdmin: (params) => api.get('/admin/bootcamps', { params }),
+    create: (data) => api.post('/admin/bootcamps', data),
+    update: (id, data) => api.put(`/admin/bootcamps/${id}`, data),
+    delete: (id) => api.delete(`/admin/bootcamps/${id}`),
 };
 
 export const bundleApi = {
@@ -158,6 +171,10 @@ export const bundleApi = {
     getById: (id) => api.get(`/course-bundles/${id}`),
     getCourses: (id) => api.get(`/course-bundles/${id}/courses`),
     enroll: (id) => api.post(`/course-bundles/${id}/enroll`),
+    getAllAdmin: (params) => api.get('/admin/bundles', { params }),
+    create: (data) => api.post('/admin/bundles', data),
+    update: (id, data) => api.put(`/admin/bundles/${id}`, data),
+    delete: (id) => api.delete(`/admin/bundles/${id}`),
 };
 
 export const quizApi = {
@@ -186,13 +203,21 @@ export const supportApi = {
 export const payoutApi = {
     getAll: (params) => api.get('/payouts', { params }),
     request: (data) => api.post('/payouts/request', data),
+    getAllAdmin: (params) => api.get('/admin/payouts', { params }),
+    getById: (id) => api.get(`/admin/payouts/${id}`),
+    approve: (id) => api.post(`/admin/payouts/${id}/approve`),
+    reject: (id) => api.post(`/admin/payouts/${id}/reject`),
+    process: (id) => api.post(`/admin/payouts/${id}/process`),
+    getStats: () => api.get('/admin/payouts/stats'),
 };
 
 export const analyticsApi = {
-    getDashboard: (params) => api.get('/analytics/dashboard', { params }),
-    getRevenue: (params) => api.get('/analytics/revenue', { params }),
+    getDashboard: (params) => api.get('/admin/dashboard', { params }),
+    getRevenue: (params) => api.get('/admin/kpis', { params }),
     getEnrollments: (params) => api.get('/analytics/enrollments', { params }),
     getCourses: (params) => api.get('/analytics/courses', { params }),
+    getStats: () => api.get('/admin/kpis'),
+    getReports: () => api.get('/admin/kpis/reports'),
 };
 
 export const userApi = {
@@ -253,6 +278,33 @@ export const noticeApi = {
 
 export const contactApi = {
     send: (data) => api.post('/contact', data),
+};
+
+export const settingsApi = {
+    get: () => api.get('/admin/settings'),
+    getGroup: (group) => api.get(`/admin/settings/${group}`),
+    update: (data) => api.put('/admin/settings', data),
+    updateKey: (key, data) => api.put(`/admin/settings/${key}`, data),
+};
+
+export const teamTrainingApi = {
+    getAll: (params) => api.get('/admin/team-packages', { params }),
+    getById: (id) => api.get(`/admin/team-packages/${id}`),
+    create: (data) => api.post('/admin/team-packages', data),
+    update: (id, data) => api.put(`/admin/team-packages/${id}`, data),
+    delete: (id) => api.delete(`/admin/team-packages/${id}`),
+    duplicate: (id) => api.post(`/admin/team-packages/${id}/duplicate`),
+    toggleStatus: (id) => api.post(`/admin/team-packages/${id}/toggle-status`),
+    getCourses: () => api.get('/admin/team-packages/courses'),
+};
+
+export const ebookApi = {
+    getAll: (params) => api.get('/admin/ebooks', { params }),
+    getById: (id) => api.get(`/admin/ebooks/${id}`),
+    create: (data) => api.post('/admin/ebooks', data),
+    update: (id, data) => api.put(`/admin/ebooks/${id}`, data),
+    delete: (id) => api.delete(`/admin/ebooks/${id}`),
+    updateStatus: (id, data) => api.post(`/admin/ebooks/${id}/status`, data),
 };
 
 export default api;

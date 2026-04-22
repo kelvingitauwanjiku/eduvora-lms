@@ -87,11 +87,37 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { bundleApi, courseApi } from '@/services/api';
 
+const loading = ref(true);
 const showCreateModal = ref(false);
 const bundles = ref([]);
 const availableCourses = ref([]);
 const form = reactive({ title: '', description: '', price: 0, is_subscription: false, course_ids: [] });
 
-onMounted(() => {});
+async function fetchBundles() {
+    try {
+        loading.value = true;
+        const { data } = await bundleApi.getAllAdmin();
+        bundles.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching bundles:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+async function fetchCourses() {
+    try {
+        const { data } = await courseApi.getAll();
+        availableCourses.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+    }
+}
+
+onMounted(() => {
+    fetchBundles();
+    fetchCourses();
+});
 </script>

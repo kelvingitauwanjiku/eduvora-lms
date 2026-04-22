@@ -231,7 +231,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { courseApi, categoryApi } from '../../../services/api';
+import { courseApi, categoryApi } from '@/services/api';
 
 const route = useRoute();
 const router = useRouter();

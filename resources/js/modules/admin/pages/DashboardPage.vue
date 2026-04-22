@@ -380,6 +380,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { analyticsApi, enrollmentApi, userApi, courseApi } from '@/services/api';
 import LineChart from '@/components/ui/LineChart.vue';
 import BarChart from '@/components/ui/BarChart.vue';
 import DoughnutChart from '@/components/ui/DoughnutChart.vue';
@@ -391,28 +392,28 @@ const loading = ref(true);
 const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const stats = ref({
-    total_users: 1250,
-    total_courses: 348,
-    total_enrollments: 4820,
-    total_revenue: 156780,
-    userGrowth: 12.5,
-    courseGrowth: 8.3,
-    enrollmentGrowth: 15.2,
-    revenueGrowth: 23.8,
+    total_users: 0,
+    total_courses: 0,
+    total_enrollments: 0,
+    total_revenue: 0,
+    userGrowth: 0,
+    courseGrowth: 0,
+    enrollmentGrowth: 0,
+    revenueGrowth: 0,
 });
 
 const pendingApprovals = ref({
-    total: 24,
-    courses: 8,
-    instructors: 5,
-    payouts: 3,
-    tickets: 8,
+    total: 0,
+    courses: 0,
+    instructors: 0,
+    payouts: 0,
+    tickets: 0,
 });
 
 const systemStats = ref({
-    apiResponse: 45,
+    apiResponse: 0,
     uptime: 99.9,
-    storageUsed: '2.4 GB / 10 GB',
+    storageUsed: '0 GB / 10 GB',
 });
 
 const systemStatus = ref([
@@ -423,30 +424,10 @@ const systemStatus = ref([
     { name: 'Payment Gateway', status: 'online' },
 ]);
 
-const recentEnrollments = ref([
-    { id: 1, student: { name: 'Sarah Johnson', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' }, course: { title: 'React Masterclass' }, amount: 99, created_at: '2026-04-20T10:30:00Z' },
-    { id: 2, student: { name: 'Michael Chen', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' }, course: { title: 'Python for Data Science' }, amount: 149, created_at: '2026-04-20T09:15:00Z' },
-    { id: 3, student: { name: 'Emily Davis', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' }, course: { title: 'UI/UX Design Fundamentals' }, amount: 79, created_at: '2026-04-20T08:45:00Z' },
-    { id: 4, student: { name: 'David Wilson', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' }, course: { title: 'Machine Learning A-Z' }, amount: 199, created_at: '2026-04-19T16:20:00Z' },
-    { id: 5, student: { name: 'Jessica Brown', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' }, course: { title: 'Digital Marketing 2026' }, amount: 89, created_at: '2026-04-19T14:30:00Z' },
-]);
-
-const topInstructors = ref([
-    { id: 1, name: 'John Smith', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100', total_students: 12450, total_earnings: 124500, rating: 4.9 },
-    { id: 2, name: 'Lisa Anderson', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100', total_students: 8920, total_earnings: 89200, rating: 4.8 },
-    { id: 3, name: 'Robert Taylor', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100', total_students: 7650, total_earnings: 76500, rating: 4.7 },
-    { id: 4, name: 'Amanda White', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100', total_students: 5430, total_earnings: 54300, rating: 4.9 },
-]);
-
-const revenueChart = ref({
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    data: [12500, 15800, 18200, 21400, 19800, 24500, 28200, 25600, 28900, 31200, 28400, 35600],
-});
-
-const categoryChart = ref({
-    labels: ['Development', 'Business', 'Design', 'Marketing', 'Data Science', 'Other'],
-    data: [35, 20, 18, 12, 10, 5],
-});
+const recentEnrollments = ref([]);
+const topInstructors = ref([]);
+const revenueChart = ref({ labels: [], data: [] });
+const categoryChart = ref({ labels: [], data: [] });
 
 function formatNumber(num) {
     if (!num) return '0';
@@ -474,17 +455,71 @@ function formatTimeAgo(date) {
     return Math.floor(diff / 86400) + ' days ago';
 }
 
-async function refreshData() {
+async function fetchDashboard() {
     loading.value = true;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    loading.value = false;
+    try {
+        const [dashboardRes, enrollmentsRes] = await Promise.all([
+            analyticsApi.getDashboard({ period: period.value }),
+            enrollmentApi.getAllAdmin({ recent: true, limit: 5 })
+        ]);
+        
+        const dashboard = dashboardRes.data;
+        stats.value = {
+            total_users: dashboard.total_users || 0,
+            total_courses: dashboard.total_courses || 0,
+            total_enrollments: dashboard.total_enrollments || 0,
+            total_revenue: dashboard.total_revenue || 0,
+            userGrowth: dashboard.user_growth || 0,
+            courseGrowth: dashboard.course_growth || 0,
+            enrollmentGrowth: dashboard.enrollment_growth || 0,
+            revenueGrowth: dashboard.revenue_growth || 0,
+        };
+        
+        pendingApprovals.value = {
+            total: (dashboard.pending_courses || 0) + (dashboard.pending_instructors || 0) + (dashboard.pending_payouts || 0) + (dashboard.pending_tickets || 0),
+            courses: dashboard.pending_courses || 0,
+            instructors: dashboard.pending_instructors || 0,
+            payouts: dashboard.pending_payouts || 0,
+            tickets: dashboard.pending_tickets || 0,
+        };
+        
+        if (dashboard.revenue_chart) {
+            revenueChart.value = dashboard.revenue_chart;
+        }
+        
+        if (dashboard.category_enrollments) {
+            categoryChart.value = {
+                labels: dashboard.category_enrollments.map(c => c.name),
+                data: dashboard.category_enrollments.map(c => c.count)
+            };
+        }
+        
+        recentEnrollments.value = enrollmentsRes.data.data || [];
+        
+        if (dashboard.top_instructors) {
+            topInstructors.value = dashboard.top_instructors;
+        }
+        
+        if (dashboard.system_stats) {
+            systemStats.value = dashboard.system_stats;
+        }
+        
+    } catch (error) {
+        console.error('Error fetching dashboard:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+async function refreshData() {
+    await fetchDashboard();
 }
 
 onMounted(() => {
-    loading.value = false;
+    fetchDashboard();
 });
 
 watch(period, () => {
-    refreshData();
+    fetchDashboard();
 });
 </script>

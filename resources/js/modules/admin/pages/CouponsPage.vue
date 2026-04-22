@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { couponApi } from '../../../services/api';
+import { couponApi } from '@/services/api';
 
 const showCreateModal = ref(false);
 const coupons = ref([]);

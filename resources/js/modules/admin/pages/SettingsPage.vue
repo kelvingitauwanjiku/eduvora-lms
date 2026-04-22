@@ -83,32 +83,55 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import { settingsApi } from '@/services/api';
 
 const saving = ref(false);
+const loading = ref(true);
 
 const settings = reactive({
-    site_name: 'Eduvora',
-    site_email: 'support@eduvora.com',
+    site_name: '',
+    site_email: '',
     footer_text: '',
     currency: 'USD',
     instructor_share: 70,
     maintenance_mode: false,
 });
 
+async function fetchSettings() {
+    try {
+        loading.value = true;
+        const { data } = await settingsApi.get();
+        Object.assign(settings, data);
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
 async function saveSettings() {
     saving.value = true;
     try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await settingsApi.update(settings);
         alert('Settings saved!');
     } catch (error) {
         console.error('Error saving settings:', error);
+        alert('Failed to save settings');
     } finally {
         saving.value = false;
     }
 }
 
-function clearCache() {
-    alert('Cache cleared!');
+async function clearCache() {
+    try {
+        alert('Cache cleared!');
+    } catch (error) {
+        console.error('Error clearing cache:', error);
+    }
 }
+
+onMounted(() => {
+    fetchSettings();
+});
 </script>

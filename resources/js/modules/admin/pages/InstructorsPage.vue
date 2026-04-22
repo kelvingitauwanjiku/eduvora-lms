@@ -57,16 +57,31 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { instructorApi } from '@/services/api';
 
 const search = ref('');
 const instructors = ref([]);
+const loading = ref(false);
 
 async function fetchInstructors() {
-    instructors.value = [];
+    loading.value = true;
+    try {
+        const { data } = await instructorApi.getAll({ search: search.value });
+        instructors.value = data.data || data;
+    } catch (err) {
+        console.error('Failed to load instructors:', err);
+    } finally {
+        loading.value = false;
+    }
 }
 
-async function approveInstructor(id) {
-    console.log('Approve:', id);
+async function updateStatus(instructor, status) {
+    try {
+        await instructorApi.updateProfile({ id: instructor.id, status });
+        instructor.status = status;
+    } catch (err) {
+        alert(err.response?.data?.message || 'Failed to update');
+    }
 }
 
 onMounted(() => { fetchInstructors(); });

@@ -37,7 +37,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { blogApi } from '@/services/api';
 
+const loading = ref(true);
 const blogs = ref([]);
+
+async function fetchBlogs() {
+    try {
+        loading.value = true;
+        const { data } = await blogApi.getAllAdmin();
+        blogs.value = data.data || [];
+    } catch (error) {
+        console.error('Error fetching blogs:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+async function deleteBlog(id) {
+    if (confirm('Are you sure you want to delete this blog?')) {
+        try {
+            await blogApi.deleteAdmin(id);
+            blogs.value = blogs.value.filter(b => b.id !== id);
+        } catch (error) {
+            console.error('Error deleting blog:', error);
+            alert('Failed to delete blog');
+        }
+    }
+}
+
+onMounted(() => {
+    fetchBlogs();
+});
 </script>

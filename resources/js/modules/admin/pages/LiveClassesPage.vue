@@ -60,8 +60,30 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import { liveClassApi } from '@/services/api';
+
 const stats = reactive({ total: 0, upcoming: 0, live: 0, completed: 0 });
 const classes = ref([]);
+const loading = ref(false);
+
+async function fetchClasses() {
+    loading.value = true;
+    try {
+        const { data } = await liveClassApi.getAll();
+        classes.value = data.data || data;
+        stats.total = classes.value.length;
+        stats.upcoming = classes.value.filter(c => c.status === 'scheduled').length;
+        stats.live = classes.value.filter(c => c.status === 'live').length;
+        stats.completed = classes.value.filter(c => c.status === 'completed').length;
+    } catch (err) {
+        console.error('Failed to load classes:', err);
+    } finally {
+        loading.value = false;
+    }
+}
+
 function formatDate(d) { return new Date(d).toLocaleString(); }
+
+onMounted(() => { fetchClasses(); });
 </script>
