@@ -195,7 +195,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { categoryApi } from '../../../services/api';
 
 const search = ref('');
 const filterStatus = ref('');
@@ -204,17 +205,37 @@ const modalOpen = ref(false);
 const modalMode = ref('create');
 const deleteModalOpen = ref(false);
 const categoryToDelete = ref(null);
+const loading = ref(false);
 
-const categories = ref([
-    { id: 1, name: 'Web Development', description: 'Learn frontend, backend, and full-stack web development', icon: '💻', color: '#3b82f6', courses_count: 45, is_active: true, parent_id: null, slug: 'web-development' },
-    { id: 2, name: 'Data Science', description: 'Master data analysis, machine learning, and AI', icon: '📊', color: '#10b981', courses_count: 38, is_active: true, parent_id: null, slug: 'data-science' },
-    { id: 3, name: 'Mobile Development', description: 'Build iOS and Android apps with modern frameworks', icon: '📱', color: '#8b5cf6', courses_count: 28, is_active: true, parent_id: null, slug: 'mobile-development' },
-    { id: 4, name: 'Cloud Computing', description: 'AWS, Azure, Google Cloud and DevOps practices', icon: '☁️', color: '#06b6d4', courses_count: 22, is_active: true, parent_id: null, slug: 'cloud-computing' },
-    { id: 5, name: 'UI/UX Design', description: 'Create beautiful and user-friendly interfaces', icon: '🎨', color: '#f59e0b', courses_count: 35, is_active: true, parent_id: null, slug: 'ui-ux-design' },
-    { id: 6, name: 'Business & Management', description: 'Entrepreneurship, marketing, and leadership', icon: '💼', color: '#ec4899', courses_count: 42, is_active: true, parent_id: null, slug: 'business-management' },
-    { id: 7, name: 'Cybersecurity', description: 'Network security, ethical hacking, and protection', icon: '🔒', color: '#ef4444', courses_count: 18, is_active: false, parent_id: null, slug: 'cybersecurity' },
-    { id: 8, name: 'Artificial Intelligence', description: 'Deep learning, NLP, and AI applications', icon: '🤖', color: '#6366f1', courses_count: 25, is_active: true, parent_id: null, slug: 'artificial-intelligence' },
-]);
+const categories = ref([]);
+
+async function fetchCategories() {
+    loading.value = true;
+    try {
+        const { data } = await categoryApi.getAll();
+        categories.value = data.data || data;
+    } catch (err) {
+        console.error('Failed to load categories:', err);
+    } finally {
+        loading.value = false;
+    }
+
+    // Default dummy data if API fails
+    if (categories.value.length === 0) {
+        categories.value = [
+            { id: 1, name: 'Web Development', description: 'Learn frontend, backend, and full-stack web development', icon: '💻', color: '#3b82f6', courses_count: 45, is_active: true, parent_id: null, slug: 'web-development' },
+            { id: 2, name: 'Data Science', description: 'Master data analysis, machine learning, and AI', icon: '📊', color: '#10b981', courses_count: 38, is_active: true, parent_id: null, slug: 'data-science' },
+            { id: 3, name: 'Mobile Development', description: 'Build iOS and Android apps with modern frameworks', icon: '📱', color: '#8b5cf6', courses_count: 28, is_active: true, parent_id: null, slug: 'mobile-development' },
+            { id: 4, name: 'Cloud Computing', description: 'AWS, Azure, Google Cloud and DevOps practices', icon: '☁️', color: '#06b6d4', courses_count: 22, is_active: true, parent_id: null, slug: 'cloud-computing' },
+            { id: 5, name: 'UI/UX Design', description: 'Create beautiful and user-friendly interfaces', icon: '🎨', color: '#f59e0b', courses_count: 35, is_active: true, parent_id: null, slug: 'ui-ux-design' },
+            { id: 6, name: 'Business & Management', description: 'Entrepreneurship, marketing, and leadership', icon: '💼', color: '#ec4899', courses_count: 42, is_active: true, parent_id: null, slug: 'business-management' },
+            { id: 7, name: 'Cybersecurity', description: 'Network security, ethical hacking, and protection', icon: '🔒', color: '#ef4444', courses_count: 18, is_active: false, parent_id: null, slug: 'cybersecurity' },
+            { id: 8, name: 'Artificial Intelligence', description: 'Deep learning, NLP, and AI applications', icon: '🤖', color: '#6366f1', courses_count: 25, is_active: true, parent_id: null, slug: 'artificial-intelligence' },
+        ];
+    }
+}
+
+fetchCategories();
 
 const form = ref({
     id: null,

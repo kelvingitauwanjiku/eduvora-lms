@@ -63,10 +63,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { userApi } from '../../../services/api';
 
 const search = ref('');
 const role = ref('');
 const users = ref([]);
+const loading = ref(false);
 
 function formatDate(date) {
     if (!date) return '';
@@ -74,16 +76,34 @@ function formatDate(date) {
 }
 
 async function fetchUsers() {
-    users.value = [];
+    loading.value = true;
+    try {
+        const { data } = await userApi.getAll({ search: search.value, role: role.value });
+        users.value = data.data || data;
+    } catch (err) {
+        console.error('Failed to load users:', err);
+    } finally {
+        loading.value = false;
+    }
 }
 
-async function updateRole(user) {
-    console.log('Update role:', user.id, user.role);
+async function updateRole(user, newRole) {
+    try {
+        await userApi.updateRole(user.id, { role: newRole });
+        user.role = newRole;
+    } catch (err) {
+        alert(err.response?.data?.message || 'Failed to update role');
+    }
 }
 
 async function deleteUser(id) {
-    if (confirm('Delete this user?')) {
-        console.log('Delete user:', id);
+    if (confirm('Are you sure you want to delete this user?')) {
+        try {
+            await userApi.delete(id);
+            users.value = users.value.filter(u => u.id !== id);
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to delete user');
+        }
     }
 }
 

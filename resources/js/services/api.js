@@ -63,9 +63,12 @@ export const courseApi = {
 };
 
 export const categoryApi = {
-    getAll: () => api.get('/categories'),
+    getAll: (params) => api.get('/categories', { params }),
     getById: (id) => api.get(`/categories/${id}`),
     getCourses: (id, params) => api.get(`/categories/${id}/courses`, { params }),
+    create: (data) => api.post('/categories', data),
+    update: (id, data) => api.put(`/categories/${id}`, data),
+    delete: (id) => api.delete(`/categories/${id}`),
 };
 
 export const instructorApi = {

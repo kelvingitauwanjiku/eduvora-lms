@@ -40,14 +40,59 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { couponApi } from '../../../services/api';
 
 const showCreateModal = ref(false);
 const coupons = ref([]);
+const loading = ref(false);
+const error = ref('');
+
+const newCoupon = ref({
+    code: '',
+    discount: '',
+    type: 'percentage',
+    expires_at: ''
+});
+
+async function fetchCoupons() {
+    loading.value = true;
+    try {
+        const { data } = await couponApi.getAll();
+        coupons.value = data.data || data;
+    } catch (err) {
+        error.value = err.response?.data?.message || 'Failed to load coupons';
+    } finally {
+        loading.value = false;
+    }
+}
+
+async function createCoupon() {
+    try {
+        await couponApi.create(newCoupon.value);
+        showCreateModal.value = false;
+        fetchCoupons();
+    } catch (err) {
+        alert(err.response?.data?.message || 'Failed to create coupon');
+    }
+}
+
+async function deleteCoupon(id) {
+    if (confirm('Delete this coupon?')) {
+        try {
+            await couponApi.delete(id);
+            coupons.value = coupons.value.filter(c => c.id !== id);
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to delete coupon');
+        }
+    }
+}
 
 function formatDate(date) {
     if (!date) return 'Never';
     return new Date(date).toLocaleDateString();
 }
 
-onMounted(() => {});
+onMounted(() => {
+    fetchCoupons();
+});
 </script>
