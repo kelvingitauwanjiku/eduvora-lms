@@ -12,6 +12,18 @@ export default defineConfig({
         tailwindcss(),
         vue(),
     ],
+    build: {
+        target: 'esnext',
+        minify: 'esbuild',
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor': ['vue', 'vue-router', 'pinia', 'axios'],
+                    'charts': ['chart.js', 'vue-chartjs'],
+                },
+            },
+        },
+    },
     server: {
         host: '127.0.0.1',
         port: 5173,
